@@ -1,10 +1,11 @@
 import imaplib
 import email
 import os
+import getpass
 
 print("----------GMAIL COMMANDER----------\n")
 user = input("E-mail: ")
-password = input("Password: ")
+password = getpass.getpass("Password: ")
 imap_url = "imap.gmail.com"
 
 print()

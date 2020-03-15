@@ -22,7 +22,7 @@ try:
     s = smtplib.SMTP_SSL(smtp_url)
     s.login(user, password)
 
-    old_id = 0
+    old_id = "x"
     new_id = 0
     current_message = ""
     from_user = ""
@@ -47,22 +47,29 @@ try:
                 "plain" in content_type
                 and email_message["Subject"].lower() == "command"
             ):
-                current_message = part.get_payload()
+                current_message = part.get_payload(decode=True)
+                current_message = current_message.rstrip().decode("utf-8")
                 new_id = most_recent
 
-            if old_id != new_id and old_id != 0:
-                from_user = email_message["From"]
+            if old_id != new_id and old_id != "x":
+                from_user = email_message["From"].split()
+                from_user = from_user[-1][1:-1]
+
                 response = subprocess.check_output(
-                    current_message[:-2], shell=True, stderr=subprocess.STDOUT
+                    current_message, shell=True, stderr=subprocess.STDOUT
                 )
                 msg = "Subject: {}\n\n{}".format(
                     "Response", email.message_from_bytes(response)
                 )
 
                 try:
-                    s.sendmail(user, from_user, msg)
+                    s.sendmail(
+                        user, from_user, msg,
+                    )
+                    print(20 * "*" + "\n")
                     print("Replied to: " + from_user)
-                    print("Command: " + current_message)
+                    print("Command: " + current_message.replace("\n", ""))
+                    print("Result: " + response.decode("utf-8"))
                 except:
                     print("Could not reply to: " + from_user)
 

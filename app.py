@@ -1,21 +1,29 @@
 import imaplib
+import smtplib
 import email
-import os
 import getpass
+import subprocess
 
 print("----------GMAIL COMMANDER----------\n")
 user = input("E-mail: ")
 password = getpass.getpass("Password: ")
 imap_url = "imap.gmail.com"
+smtp_url = "smtp.gmail.com"
 
 print()
 
+# IMAP
 mail = imaplib.IMAP4_SSL(imap_url)
 mail.login(user, password)
 mail.select("INBOX")
 
+# SMTP
+s = smtplib.SMTP_SSL(smtp_url)
+s.login(user, password)
+
 old_message = ""
 current_message = ""
+from_user = ""
 
 while True:
     result, data = mail.uid("search", None, "ALL")
@@ -37,7 +45,10 @@ while True:
             current_message = part.get_payload()
 
         if old_message != current_message:
-            os.system(current_message[:-2])
-            print("\n" + 100 * "-" + "\n")
+            from_user = email_message["From"]
+            message = subprocess.check_output(
+                current_message[:-2], shell=True, stderr=subprocess.STDOUT
+            )
+            s.sendmail(user, from_user, message)
+            print("Replied to: " + from_user)
             old_message = current_message
-

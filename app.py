@@ -4,7 +4,7 @@ import email
 import getpass
 import subprocess
 
-print("----------GMAIL COMMANDER----------\n")
+print("\n----------GMAIL COMMANDER----------\n")
 user = input("E-mail: ")
 password = getpass.getpass("Password: ")
 imap_url = "imap.gmail.com"
@@ -43,7 +43,10 @@ try:
             filename = part.get_filename()
             content_type = part.get_content_type()
 
-            if "plain" in content_type and email_message["Subject"] == "command":
+            if (
+                "plain" in content_type
+                and email_message["Subject"].lower() == "command"
+            ):
                 current_message = part.get_payload()
                 new_id = most_recent
 
@@ -59,6 +62,7 @@ try:
                 try:
                     s.sendmail(user, from_user, msg)
                     print("Replied to: " + from_user)
+                    print("Command: " + current_message)
                 except:
                     print("Could not reply to: " + from_user)
 
